@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-@Schema(description = "用户实体类")
+@Schema(description = "用户实体")
 @Data
 public class User {
 
