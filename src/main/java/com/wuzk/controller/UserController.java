@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @Operation(summary = "根据ID查询用户", description = "通过用户ID获取单个用户信息")
-    @Tool(description = "根据ID查询用户")
+    @Tool(description = "通过用户ID获取单个用户信息")
     @GetMapping("/{id}")
     public User getUserById(@ToolParam(description = "用户ID") @PathVariable Long id) {
         return userService.getUserById(id);
