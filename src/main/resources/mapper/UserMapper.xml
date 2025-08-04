@@ -10,7 +10,7 @@
         <result column="username" property="username"/>
         <result column="password" property="password"/>
         <result column="email" property="email"/>
-        <result column="created_at" property="createdAt"/>
+        <result column="create_time" property="createTime"/>
     </resultMap>
 
     <select id="selectUserById" resultMap="userResultMap">
@@ -18,19 +18,20 @@
     </select>
 
     <select id="selectAllUsers" resultMap="userResultMap">
-        SELECT * FROM user ORDER BY created_at DESC
+        SELECT * FROM user ORDER BY create_time DESC
     </select>
 
     <insert id="insertUser" parameterType="com.wuzk.entity.User">
-        INSERT INTO user (username, password, email)
-        VALUES (#{username}, #{password}, #{email})
+        INSERT INTO user (username, password, email, create_time)
+        VALUES (#{username}, #{password}, #{email}, now())
     </insert>
 
     <update id="updateUser" parameterType="com.wuzk.entity.User">
         UPDATE user
         SET username = #{username},
             password = #{password},
-            email = #{email}
+            email = #{email},
+            create_time = now()
         WHERE id = #{id}
     </update>
 
