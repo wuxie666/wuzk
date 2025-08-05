@@ -44,7 +44,7 @@ public class UserController {
     public Map<String, Object> createUser(@ToolParam(description = "用户实体") @RequestBody User user) {
         userService.createUser(user);
 
-        Map<String, Object> response = new HashMap<>();
+        var response = new HashMap<String, Object>();
         response.put("status", "success");
         response.put("message", "User created");
         response.put("user", user);
@@ -58,7 +58,7 @@ public class UserController {
     public Map<String, Object> updateUser(@ToolParam(description = "用户实体") @RequestBody User user) {
         userService.updateUser(user);
 
-        Map<String, Object> response = new HashMap<>();
+        var response = new HashMap<String, Object>();
         response.put("status", "success");
         response.put("message", "User updated");
         response.put("user", user);
@@ -70,7 +70,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public Map<String, Object> deleteUser(@ToolParam(description = "用户ID") @Parameter(description = "用户ID")  @PathVariable Long id) {
         userService.deleteUser(id);
-        Map<String, Object> response = new HashMap<>();
+        var response = new HashMap<String, Object>();
         response.put("status", "success");
         response.put("message", "User deleted");
         response.put("userId", id);
