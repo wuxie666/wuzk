@@ -31,7 +31,7 @@
         SET username = #{username},
             password = #{password},
             email = #{email},
-            create_time = now()
+            update_time = now()
         WHERE id = #{id}
     </update>
 

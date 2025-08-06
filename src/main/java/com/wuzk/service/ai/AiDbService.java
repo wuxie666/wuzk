@@ -19,25 +19,25 @@ public class AiDbService {
 
     public Map<String, Object> executeAiSql(String userCommand) {
         // 1. 生成SQL
-        String sql = openAiClient.generateSql(userCommand);
+        var sql = openAiClient.generateSql(userCommand);
 
         // 2. SQL安全检查
         if (!isSafeSql(sql)) {
             throw new RuntimeException("SQL 非法或危险，已拦截：" + sql);
         }
 
-        Map<String, Object> result = new HashMap<>();
+        var result = new HashMap<String, Object>();
         result.put("sql", sql);
 
         // 3. 判断SQL类型
-        String lower = sql.trim().toLowerCase();
+        var lower = sql.trim().toLowerCase();
         if (lower.startsWith("select")) {
             // 查询
             result.put("status", "success");
             result.put("data", jdbcTemplate.queryForList(sql));
         } else {
             // 更新或插入
-            int rows = jdbcTemplate.update(sql);
+            var rows = jdbcTemplate.update(sql);
             result.put("status", "success");
             result.put("rowsAffected", rows);
         }
@@ -48,7 +48,7 @@ public class AiDbService {
     /** 简单SQL安全校验 */
     private boolean isSafeSql(String sql) {
         if (sql == null) return false;
-        String lower = sql.trim().toLowerCase();
+        var lower = sql.trim().toLowerCase();
         return lower.startsWith("insert") || lower.startsWith("update")
                 || lower.startsWith("select") || lower.startsWith("delete");
     }

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 数据库助手</title>
+    <!-- Vue3 & Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Prism.js SQL 高亮 -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-sql.min.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1000px; margin: auto; }
+        textarea { width: 100%; height: 80px; margin-bottom: 10px; }
+        button { margin-right: 10px; padding: 6px 12px; }
+        pre { background: #f6f8fa; padding: 10px; overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .pagination { margin-top: 10px; }
+        .pagination button { margin-right: 5px; }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <h2>AI 数据库助手</h2>
+
+    <textarea v-model="query" placeholder="请输入自然语言或 SQL 指令"></textarea>
+    <br>
+    <button @click="sendChat">发送聊天</button>
+    <button @click="executeDb">执行数据库操作</button>
+
+    <h3>聊天回复</h3>
+    <pre>{{ chatReply }}</pre>
+
+    <h3>SQL 高亮</h3>
+    <pre><code class="language-sql" v-html="highlightedSql"></code></pre>
+
+    <h3>执行结果</h3>
+    <table v-if="pagedResult.length > 0">
+        <thead>
+        <tr>
+            <th v-for="col in columns" :key="col">{{ col }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="row in pagedResult" :key="rowIndex" v-bind:key="rowIndex">
+            <td v-for="col in columns" :key="col">{{ row[col] }}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination" v-if="totalPages > 1">
+        <button :disabled="page===1" @click="page--">上一页</button>
+        <span>第 {{ page }} / {{ totalPages }} 页</span>
+        <button :disabled="page===totalPages" @click="page++">下一页</button>
+    </div>
+</div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                query: '',
+                chatReply: '',
+                sqlResult: [],
+                columns: [],
+                page: 1,
+                pageSize: 5
+            };
+        },
+        computed: {
+            highlightedSql() {
+                if (!this.query.trim()) return '';
+                return Prism.highlight(this.query, Prism.languages.sql, 'sql');
+            },
+            totalPages() {
+                return Math.ceil(this.sqlResult.length / this.pageSize);
+            },
+            pagedResult() {
+                const start = (this.page - 1) * this.pageSize;
+                return this.sqlResult.slice(start, start + this.pageSize);
+            }
+        },
+        methods: {
+            sendChat() {
+                if (!this.query.trim()) return alert('请输入内容');
+                axios.post('/ai/chat', { query: this.query })
+                    .then(res => {
+                        this.chatReply = res.data.reply || JSON.stringify(res.data);
+                    })
+                    .catch(err => alert('聊天接口错误：' + err));
+            },
+            executeDb() {
+                if (!this.query.trim()) return alert('请输入内容');
+                axios.post('/ai/db/execute', { query: this.query })
+                    .then(res => {
+                        if (res.data && Array.isArray(res.data.data)) {
+                            this.sqlResult = res.data.data;
+                            this.columns = this.sqlResult.length > 0 ? Object.keys(this.sqlResult[0]) : [];
+                            this.page = 1;
+                        } else {
+                            this.sqlResult = [];
+                            this.columns = [];
+                        }
+                    })
+                    .catch(err => alert('数据库接口错误：' + err));
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

@@ -32,4 +32,8 @@ public class User {
     @ToolParam(description = "创建时间")
     @Schema(description = "创建时间", example = "2025-07-31 15:43:52")
     private LocalDateTime createTime;
+
+    @ToolParam(description = "更新时间")
+    @Schema(description = "更新时间", example = "2025-07-31 15:43:52")
+    private LocalDateTime updateTime;
 }

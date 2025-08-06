@@ -70,7 +70,7 @@ public class ChatController {
     }
 
     // 如果前端没有传 chat-id，后端自动生成 UUID
-    String chatId = request.getOrDefault("chat-id", UUID.randomUUID().toString());
+    var chatId = request.getOrDefault("chat-id", UUID.randomUUID().toString());
 
     // 调用大模型
     var reply = dashScopeChatClient.prompt(query)

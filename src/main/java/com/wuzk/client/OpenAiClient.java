@@ -16,7 +16,7 @@ public class OpenAiClient {
      */
     public String generateSql(String command) {
         // 提示词设计
-        String prompt = """
+        var prompt = """
                         你是一个MySQL专家。
                         根据以下自然语言指令生成一条安全的MySQL语句。
                         
@@ -30,14 +30,14 @@ public class OpenAiClient {
                         """ + command;
 
 
-        Map<String, String> request = new HashMap<>();
+        var request = new HashMap<String, String>();
         request.put("query", prompt);
 
         // 调用你原来的大模型接口（假设返回JSON里有"reply"字段）
-        Map<String, Object> response = restTemplate.postForObject(
+        var response = restTemplate.postForObject(
                 "http://localhost:8080/ai/chat", request, Map.class);
 
-        String reply = (String) response.get("reply");
+        var reply = (String) response.get("reply");
         return extractSql(reply);
     }
 
@@ -47,8 +47,8 @@ public class OpenAiClient {
     private String extractSql(String reply) {
         if (reply == null) return "";
         // 取第一行分号结尾或整段文本
-        String cleaned = reply.trim();
-        int idx = cleaned.indexOf(";");
+        var cleaned = reply.trim();
+        var idx = cleaned.indexOf(";");
         if (idx != -1) {
             return cleaned.substring(0, idx + 1);
         }

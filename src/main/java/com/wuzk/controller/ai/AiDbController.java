@@ -23,7 +23,7 @@ public class AiDbController {
      */
     @PostMapping("/execute")
     public Map<String, Object> execute(@RequestBody Map<String, String> request) {
-        String query = request.get("query"); // 自然语言指令
+        var query = request.get("query"); // 自然语言指令
         return aiDbService.executeAiSql(query);
     }
 }
