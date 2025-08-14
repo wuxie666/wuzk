@@ -24,8 +24,8 @@
     </select>
 
     <insert id="insertUser" parameterType="com.wuzk.entity.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (username, password, email, create_time, update_time)
-        VALUES (#{username}, #{password}, #{email}, now(), now())
+        INSERT INTO user (username, password, email, dept_id, create_time, update_time)
+        VALUES (#{username}, #{password}, #{email}, #{deptId}, now(), now())
     </insert>
 
     <update id="updateUser" parameterType="com.wuzk.entity.User">
