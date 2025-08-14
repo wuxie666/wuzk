@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wuzk.mapper.DepartmentMapper">
+
+    <resultMap id="departmentResultMap" type="com.wuzk.entity.Department">
+        <id column="id" property="id"/>
+        <result column="dept_name" property="deptName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectDepartmentById" resultMap="departmentResultMap">
+        SELECT * FROM department WHERE id = #{id}
+    </select>
+
+    <select id="selectAllDepartments" resultMap="departmentResultMap">
+        SELECT * FROM department ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertDepartment" parameterType="com.wuzk.entity.Department" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO department (dept_name, create_time, update_time)
+        VALUES (#{deptName}, now(), now())
+    </insert>
+
+    <update id="updateDepartment" parameterType="com.wuzk.entity.Department">
+        UPDATE department
+        SET dept_name = #{deptName},
+            update_time = now()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteDepartmentById" parameterType="long">
+        DELETE FROM department WHERE id = #{id}
+    </delete>
+
+    <select id="selectDepartmentByName" parameterType="string" resultType="com.wuzk.entity.Department">
+        SELECT id, dept_name AS deptName, create_time AS createTime, update_time AS updateTime
+        FROM department
+        WHERE dept_name = #{deptName}
+    </select>
+
+</mapper>

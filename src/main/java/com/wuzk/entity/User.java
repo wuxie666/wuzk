@@ -29,6 +29,10 @@ public class User {
     @Schema(description = "邮箱", example = "zhangsan@example.com")
     private String email;
 
+    @ToolParam(description = "所属部门ID，可选")
+    @Schema(description = "所属部门ID", example = "3")
+    private String deptId;
+
     @ToolParam(description = "创建时间")
     @Schema(description = "创建时间", example = "2025-07-31 15:43:52")
     private LocalDateTime createTime;

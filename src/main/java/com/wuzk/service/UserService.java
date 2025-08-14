@@ -10,4 +10,5 @@ public interface UserService {
     int createUser(User user);
     int updateUser(User user);
     int deleteUser(Long id);
+    User getUserByUsername(String username); // 新增
 }

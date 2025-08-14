@@ -2,6 +2,7 @@ package com.wuzk.controller.ai;
 
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.memory.jdbc.MysqlChatMemoryRepository;
+import com.wuzk.controller.DepartmentController;
 import com.wuzk.controller.UserController;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -26,7 +27,7 @@ public class ChatController {
   private final ChatClient dashScopeChatClient;
 
 
-  public ChatController(JdbcTemplate jdbcTemplate, ChatClient.Builder chatClientBuilder, UserController userController) {
+  public ChatController(JdbcTemplate jdbcTemplate, ChatClient.Builder chatClientBuilder, UserController userController, DepartmentController departmentController) {
 
     // 构造 ChatMemoryRepository 和 ChatMemory ,配置 MySQL 作为聊天记忆存储
     var chatMemoryRepository = MysqlChatMemoryRepository.mysqlBuilder()
@@ -43,7 +44,7 @@ public class ChatController {
         .defaultAdvisors(
             new SimpleLoggerAdvisor(), MessageChatMemoryAdvisor.builder(chatMemory).build()
         )
-        .defaultTools(userController)
+        .defaultTools(userController, departmentController)
         // 设置 ChatClient 中 ChatModel 的 Options 参数
         .defaultOptions(
             DashScopeChatOptions.builder()
@@ -73,10 +74,19 @@ public class ChatController {
     var chatId = request.getOrDefault("chat-id", UUID.randomUUID().toString());
 
     // 调用大模型
-    var reply = dashScopeChatClient.prompt(query)
-            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
-            .call()
-            .content();
+    String reply;
+    try {
+      reply = dashScopeChatClient.prompt(query)
+              .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+              .call()
+              .content();
+
+      if (reply == null || reply.isBlank()) {
+        reply = "抱歉，AI 未返回有效内容";
+      }
+    } catch (Exception e) {
+      reply = "AI 调用失败: " + e.getMessage();
+    }
 
     // 组装结构化返回
     var result = new HashMap<String, Object>();

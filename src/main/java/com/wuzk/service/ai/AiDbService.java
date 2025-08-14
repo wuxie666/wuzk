@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -17,35 +19,53 @@ public class AiDbService {
     @Autowired
     private OpenAiClient openAiClient;
 
+    /**
+     * 执行用户指令生成的 SQL（支持多条 SQL）
+     */
     public Map<String, Object> executeAiSql(String userCommand) {
-        // 1. 生成SQL
-        var sql = openAiClient.generateSql(userCommand);
+        // 1. 生成 SQL 列表
+        List<String> sqlList = openAiClient.generateSql(userCommand);
 
-        // 2. SQL安全检查
-        if (!isSafeSql(sql)) {
-            throw new RuntimeException("SQL 非法或危险，已拦截：" + sql);
+        if (sqlList.isEmpty()) {
+            throw new RuntimeException("未生成任何 SQL");
         }
 
         var result = new HashMap<String, Object>();
-        result.put("sql", sql);
+        result.put("sql", sqlList);
 
-        // 3. 判断SQL类型
-        var lower = sql.trim().toLowerCase();
-        if (lower.startsWith("select")) {
-            // 查询
-            result.put("status", "success");
-            result.put("data", jdbcTemplate.queryForList(sql));
-        } else {
-            // 更新或插入
-            var rows = jdbcTemplate.update(sql);
-            result.put("status", "success");
-            result.put("rowsAffected", rows);
+        List<Map<String, Object>> queryResults = new ArrayList<>();
+        int totalRowsAffected = 0;
+
+        for (String sql : sqlList) {
+            // 2. SQL 安全检查
+            if (!isSafeSql(sql)) {
+                throw new RuntimeException("SQL 非法或危险，已拦截：" + sql);
+            }
+
+            // 3. 判断 SQL 类型
+            var lower = sql.trim().toLowerCase();
+            if (lower.startsWith("select")) {
+                // 查询
+                queryResults.addAll(jdbcTemplate.queryForList(sql));
+            } else {
+                // 更新或插入
+                int rows = jdbcTemplate.update(sql);
+                totalRowsAffected += rows;
+            }
+        }
+
+        result.put("status", "success");
+        if (!queryResults.isEmpty()) {
+            result.put("data", queryResults);
+        }
+        if (totalRowsAffected > 0) {
+            result.put("rowsAffected", totalRowsAffected);
         }
 
         return result;
     }
 
-    /** 简单SQL安全校验 */
+    /** 简单 SQL 安全校验 */
     private boolean isSafeSql(String sql) {
         if (sql == null) return false;
         var lower = sql.trim().toLowerCase();
